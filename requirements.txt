@@ -1,0 +1,4 @@
+matplotlib
+wx
+numpy
+ezdxf
