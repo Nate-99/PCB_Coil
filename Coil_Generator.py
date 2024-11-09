@@ -135,8 +135,25 @@ class CoilGenerator(wx.Frame):
             points = list(zip(x, y))
             msp.add_polyline2d(points)
         elif form == 'eckig':
-            # Ihr bestehender Code für eckige Spulen
-            pass
+            sides = 4  
+            angle = 2 * np.pi / sides
+            steps = turns * sides
+            directions = np.array([
+                [np.cos(i * angle), np.sin(i * angle)] for i in range(sides)
+            ])
+            directions[:, 1] *= -1
+            # Schrittlänge erhöhen nach jeder halben Umdrehung
+            increment_steps = sides // 2 if sides % 2 == 0 else sides
+            step_lengths = np.zeros(steps)
+            step_length = diameter / 2
+            for i in range(steps):
+                if i % increment_steps == 0 and i > 0:
+                    step_length += (spacing + width)
+                step_lengths[i] = step_length
+            moves = directions[np.arange(steps) % sides] * step_lengths[:, np.newaxis]
+            positions = np.vstack((np.zeros(2), np.cumsum(moves, axis=0)))
+            points = [tuple(pos) for pos in positions]
+            msp.add_polyline2d(points)
 
         try:
             doc.saveas(filename)
@@ -185,8 +202,30 @@ class CoilDrawFrame(wx.Frame):
                 path.AddLineToPoint(xi, yi)
             gc.StrokePath(path)
         elif form == 'eckig':
-            # Ihr bestehender Code für eckige Spulen
-            pass
+            sides = 4
+            angle = 2 * np.pi / sides
+            steps = turns * sides
+            directions = np.array([
+                [np.cos(i * angle), np.sin(i * angle)] for i in range(sides)
+            ])
+            directions[:, 1] *= -1
+            # Schrittlänge erhöhen nach jeder halben Umdrehung
+            increment_steps = sides // 2 if sides % 2 == 0 else sides
+            step_lengths = np.zeros(steps)
+            step_length = (diameter / 2) * scale
+            for i in range(steps):
+                if i % increment_steps == 0 and i > 0:
+                    step_length += (spacing + width) * scale
+                step_lengths[i] = step_length
+            moves = directions[np.arange(steps) % sides] * step_lengths[:, np.newaxis]
+            positions = np.vstack((np.zeros(2), np.cumsum(moves, axis=0)))
+            positions += np.array([center_x, center_y])
+            # Pfad zeichnen
+            path = gc.CreatePath()
+            path.MoveToPoint(*positions[0])
+            for pos in positions[1:]:
+                path.AddLineToPoint(*pos)
+            gc.StrokePath(path)
 
 if __name__ == '__main__':
     app = wx.App()
