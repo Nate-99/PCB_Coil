@@ -28,7 +28,7 @@ class CoilGenerator(wx.Frame):
         hbox_turns = wx.BoxSizer(wx.HORIZONTAL)
         lbl_turns = wx.StaticText(panel, label='Anzahl der Windungen:')
         hbox_turns.Add(lbl_turns, flag=wx.RIGHT, border=8)
-        self.txt_turns = wx.TextCtrl(panel)
+        self.txt_turns = wx.TextCtrl(panel, value='10')
         hbox_turns.Add(self.txt_turns, proportion=1)
         vbox.Add(hbox_turns, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
 
@@ -36,7 +36,7 @@ class CoilGenerator(wx.Frame):
         hbox_diameter = wx.BoxSizer(wx.HORIZONTAL)
         lbl_diameter = wx.StaticText(panel, label='Durchmesser (mm):')
         hbox_diameter.Add(lbl_diameter, flag=wx.RIGHT, border=8)
-        self.txt_diameter = wx.TextCtrl(panel)
+        self.txt_diameter = wx.TextCtrl(panel, value='30')
         hbox_diameter.Add(self.txt_diameter, proportion=1)
         vbox.Add(hbox_diameter, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
 
@@ -44,7 +44,7 @@ class CoilGenerator(wx.Frame):
         hbox_spacing = wx.BoxSizer(wx.HORIZONTAL)
         lbl_spacing = wx.StaticText(panel, label='Abstand zwischen Windungen (mm):')
         hbox_spacing.Add(lbl_spacing, flag=wx.RIGHT, border=8)
-        self.txt_spacing = wx.TextCtrl(panel)
+        self.txt_spacing = wx.TextCtrl(panel, value='0.127')
         hbox_spacing.Add(self.txt_spacing, proportion=1)
         vbox.Add(hbox_spacing, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
 
@@ -52,7 +52,7 @@ class CoilGenerator(wx.Frame):
         hbox_width = wx.BoxSizer(wx.HORIZONTAL)
         lbl_width = wx.StaticText(panel, label='Kupferbreite (mm):')
         hbox_width.Add(lbl_width, flag=wx.RIGHT, border=8)
-        self.txt_width = wx.TextCtrl(panel)
+        self.txt_width = wx.TextCtrl(panel, value='0.2')
         hbox_width.Add(self.txt_width, proportion=1)
         vbox.Add(hbox_width, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
 
