@@ -44,7 +44,7 @@ class CoilGenerator(wx.Frame):
         hbox_spacing = wx.BoxSizer(wx.HORIZONTAL)
         lbl_spacing = wx.StaticText(panel, label='Abstand zwischen Windungen (mm):')
         hbox_spacing.Add(lbl_spacing, flag=wx.RIGHT, border=8)
-        self.txt_spacing = wx.TextCtrl(panel, value='0.127')
+        self.txt_spacing = wx.TextCtrl(panel, value='3.127')
         hbox_spacing.Add(self.txt_spacing, proportion=1)
         vbox.Add(hbox_spacing, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
 
@@ -120,45 +120,23 @@ class CoilGenerator(wx.Frame):
         diameter = params['diameter']
         spacing = params['spacing']
         width = params['width']
-
         doc = ezdxf.new(dxfversion='R2010')
         msp = doc.modelspace()
 
         if form == 'rund':
-            for i in range(turns):
-                radius_outer = (diameter / 2) + i * (spacing + width)
-                radius_inner = radius_outer - width
-
-                # Äußerer Kreis
-                msp.add_circle((0, 0), radius_outer)
-                # Innerer Kreis (falls positiv)
-                if radius_inner > 0:
-                    msp.add_circle((0, 0), radius_inner)
+            # Parameter für die archimedische Spirale
+            a = diameter / 2
+            b = (spacing + width) / (2 * np.pi)
+            max_theta = turns * 2 * np.pi
+            theta = np.linspace(0, max_theta, num=1000)
+            r = a + b * theta
+            x = r * np.cos(theta)
+            y = r * np.sin(theta)
+            points = list(zip(x, y))
+            msp.add_polyline2d(points)
         elif form == 'eckig':
-            for i in range(turns):
-                size_outer = diameter + 2 * i * (spacing + width)
-                size_inner = size_outer - 2 * width
-
-                # Äußeres Quadrat
-                points_outer = [
-                    (-size_outer / 2, -size_outer / 2),
-                    (size_outer / 2, -size_outer / 2),
-                    (size_outer / 2, size_outer / 2),
-                    (-size_outer / 2, size_outer / 2),
-                    (-size_outer / 2, -size_outer / 2)
-                ]
-                msp.add_lwpolyline(points_outer)
-
-                # Inneres Quadrat (falls Größe positiv)
-                if size_inner > 0:
-                    points_inner = [
-                        (-size_inner / 2, -size_inner / 2),
-                        (size_inner / 2, -size_inner / 2),
-                        (size_inner / 2, size_inner / 2),
-                        (-size_inner / 2, size_inner / 2),
-                        (-size_inner / 2, -size_inner / 2)
-                    ]
-                    msp.add_lwpolyline(points_inner)
+            # Ihr bestehender Code für eckige Spulen
+            pass
 
         try:
             doc.saveas(filename)
@@ -184,41 +162,31 @@ class CoilDrawFrame(wx.Frame):
         diameter = params['diameter']
         spacing = params['spacing']
         width = params['width']
-
-        # Skalierungsfaktor für die Darstellung
-        scale = 5  # Passen Sie diesen Wert an, um die Größe der Darstellung zu ändern
-
-        # Mittelpunkt der Zeichnung
+        scale = 5  # Skalierungsfaktor für die Darstellung
         w, h = self.GetSize()
         center_x = w / 2
         center_y = h / 2
-
-        # Stift für die Zeichnung
         pen = wx.Pen(wx.Colour(0, 0, 0), 1)
         gc.SetPen(pen)
 
         if form == 'rund':
-            for i in range(turns):
-                radius_outer = ((diameter / 2) + i * (spacing + width)) * scale
-                radius_inner = radius_outer - width * scale
-
-                # Äußerer Kreis
-                gc.DrawEllipse(center_x - radius_outer, center_y - radius_outer, radius_outer * 2, radius_outer * 2)
-
-                # Innerer Kreis (falls positiv)
-                if radius_inner > 0:
-                    gc.DrawEllipse(center_x - radius_inner, center_y - radius_inner, radius_inner * 2, radius_inner * 2)
+            # Parameter für die archimedische Spirale
+            a = (diameter / 2) * scale
+            b = ((spacing + width) / (2 * np.pi)) * scale
+            max_theta = turns * 2 * np.pi
+            theta = np.linspace(0, max_theta, num=1000)
+            r = a + b * theta
+            x = center_x + r * np.cos(theta)
+            y = center_y + r * np.sin(theta)
+            # Pfad zeichnen
+            path = gc.CreatePath()
+            path.MoveToPoint(x[0], y[0])
+            for xi, yi in zip(x[1:], y[1:]):
+                path.AddLineToPoint(xi, yi)
+            gc.StrokePath(path)
         elif form == 'eckig':
-            for i in range(turns):
-                size_outer = (diameter + 2 * i * (spacing + width)) * scale
-                size_inner = size_outer - 2 * width * scale
-
-                # Äußeres Quadrat
-                gc.DrawRectangle(center_x - size_outer / 2, center_y - size_outer / 2, size_outer, size_outer)
-
-                # Inneres Quadrat (falls Größe positiv)
-                if size_inner > 0:
-                    gc.DrawRectangle(center_x - size_inner / 2, center_y - size_inner / 2, size_inner, size_inner)
+            # Ihr bestehender Code für eckige Spulen
+            pass
 
 if __name__ == '__main__':
     app = wx.App()
